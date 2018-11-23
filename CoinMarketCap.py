@@ -5,11 +5,14 @@ from bs4 import BeautifulSoup
 import csv
 from datetime import datetime
 from multiprocessing import Pool
+from random import choice, uniform
+from time import sleep
+
 
 # Получение HTML кода
-def get_html(url):
-    r = requests.get(url)  # Response
-    return r.text # возвращает HTML код страницы (url)
+def get_html(url, useragent=None, proxy=None):
+    r = requests.get(url, headers=useragent, proxies=proxy)
+    return r.text
 
 # Парсинг
 def get_all_links(html):
@@ -24,7 +27,7 @@ def get_all_links(html):
         links.append(link)
     return links
 
-# Парсинг имени и цены
+# Парсинг
 def get_page_data(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -60,6 +63,16 @@ def get_page_data(html):
             'cap': cap.strip('USD')}
     return data
 
+# Добавляем названия столбцов в файле
+def add_name_row():
+    with open('coinmarketcap.csv', 'a', encoding='cp1251', newline='') as f:
+        writen = csv.writer(f, delimiter= ';')
+        writen.writerow( (  "Место",
+                            "Название монеты",
+                            "Цена (USD)",
+                            "Динамика цен",
+                            "Капитализация (USD)") )
+
 # Запись в файл
 def write_csv(data):
     with open('coinmarketcap.csv', 'a') as f:
@@ -72,31 +85,38 @@ def write_csv(data):
         
         print(data['name'], 'parsed')
 
+
 def make_all(url):
-    html = get_html(url)
-    data = get_page_data(html)
-    write_csv(data)
+    useragents = open('useragent.txt').read().split('\n')
+    proxies = open('proxy-ip.txt').read().split('\n')
+    sleep(uniform(1, 4))
+    proxy = {'http': 'http://' + choice(proxies)}
+    useragent = {'User-Agent': choice(useragents)}
+
+    try:
+        html = get_html(url, useragent, proxy)
+        data = get_page_data(html)
+        write_csv(data)
+    except:
+        print('Fail Proxy')
+
 
 def main():
-    start = datetime.now()
-    with open('coinmarketcap.csv', 'a', encoding='cp1251', newline='') as f:
-        writen = csv.writer(f, delimiter= ';')
-        writen.writerow( ("Место",
-                          "Название монеты",
-                          "Цена (USD)",
-                          "Динамика цен",
-                          "Капитализация (USD)") )
-
     url = 'https://coinmarketcap.com/all/views/all/'
-    all_links = get_all_links( get_html(url) )
+    add_name_row()
+    start = datetime.now()
+    print("--------------- START PARSING ---------------")
+
+    all_links = get_all_links(get_html(url))
 
     # map (function, list_)
-    with Pool(10) as p:
+    with Pool(1) as p:
         p.map(make_all, all_links)
 
     end = datetime.now()
     total = end - start
     print(str(total))
+    print("--------------- STOP PARSING ---------------")
 
 if __name__ == '__main__':
     main()
