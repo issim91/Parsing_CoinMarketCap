@@ -69,7 +69,7 @@ def get_all_items(html, cat_name, sity_rus_name):
 def start_parsing(sity_eng, sity_rus):
     categoties = open('Parsing_avito/cat.csv').read().split('\n')
     for cat in categoties:
-        # sleep(uniform(0, 1))
+        sleep(uniform(0, 1))
         proxy, useragent = get_proxy()
         cat_name = cat.split(';')[0]
         cat_url = cat.split(';')[-1]
