@@ -11,7 +11,7 @@ from time import sleep
 
 # Получение HTML кода
 def get_html(url, useragent=None, proxy=None):
-    r = requests.get(url, headers=useragent, proxies=proxy)
+    r = requests.get(url, headers=useragent, proxies=proxy, timeout=7)
     return r.text
 
 # Парсинг
@@ -89,12 +89,12 @@ def write_csv(data):
 def make_all(url):
     useragents = open('useragent.txt').read().split('\n')
     proxies = open('proxy-ip.txt').read().split('\n')
-    sleep(uniform(1, 4))
     proxy = {'http': 'http://' + choice(proxies)}
     useragent = {'User-Agent': choice(useragents)}
 
     try:
         html = get_html(url, useragent, proxy)
+        sleep(uniform(10, 13))
         data = get_page_data(html)
         write_csv(data)
     except:
@@ -108,9 +108,11 @@ def main():
     print("--------------- START PARSING ---------------")
 
     all_links = get_all_links(get_html(url))
-
+    print(all_links)
     # map (function, list_)
-    with Pool(1) as p:
+    with Pool(10) as p:
+        sleep(uniform(4, 6))
+        print('!!!!!!!!!!!!!!!!!')
         p.map(make_all, all_links)
 
     end = datetime.now()
