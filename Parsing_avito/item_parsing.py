@@ -10,6 +10,7 @@ from parsing_img import start_save_img, get_name
 
 def get_items_description(url, sity_rus_name):
     # print('запустил get_item_description')
+    sleep(uniform(15, 20))
     proxy, useragent = get_proxy()
     base_url = 'https://www.avito.ru/'
     all_url = base_url + url
@@ -17,28 +18,34 @@ def get_items_description(url, sity_rus_name):
     try:
         html = get_html(all_url, proxy, useragent)
         soup = BeautifulSoup(html, "lxml")
-        sleep(uniform(10, 15))
+        sleep(uniform(14, 18))
     except:
         print('Ошибка в получении HTML кода страницы' + all_url)
 
     # print('Начал парсить все о товаре')
     try:
         item_view = soup.find('div', class_='item-view')
-        sleep(uniform(2, 5))
+        sleep(uniform(5, 7))
     except:
         print('Ошибка в карточке товара: ' + all_url)
     try:
         name = item_view.find('div', class_='item-view-header').find('span', class_='title-info-title-text').text.strip()
+        sleep(uniform(5, 7))
     except:
         name = ''
     try:
         price = item_view.find('div', class_='item-view-header').find('span', class_='js-item-price').text.strip()
-        sleep(uniform(1, 3))
+        sleep(uniform(3, 5))
     except:
         price = ''
     try:
+        contact_name = item_view.find('div', class_='seller-info-name').find('a').text.strip()
+        sleep(uniform(3, 5))
+    except:
+        contact_name = ''
+    try:
         description = item_view.find('div', class_='item-description-text').find('p').text.strip()
-        sleep(uniform(1, 3))
+        sleep(uniform(2, 6))
     except:
         description = ''
     
@@ -56,6 +63,7 @@ def get_items_description(url, sity_rus_name):
         print('Нету главной картинки ' + all_url)
     # Поиск дополнительных картинок обявления
     try:
+        sleep(uniform(2, 4))
         item_img = item_view.find('div', class_='gallery-list-wrapper').find_all('li')
         # счетчик картинок
         i_img = 0
@@ -71,7 +79,7 @@ def get_items_description(url, sity_rus_name):
                 # Директория где сохраняется картинка
                 dir = get_name(url, name, sity_rus_name)
                 dir_img.append(dir)
-                sleep(uniform(1, 2))
+                sleep(uniform(1, 3))
             else:
                 break
     except:
@@ -86,4 +94,4 @@ def get_items_description(url, sity_rus_name):
     except:
         phone = ''
 
-    return name, price, description, phone, dir_img
+    return name, price, description, contact_name, phone, dir_img
