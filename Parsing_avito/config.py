@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import csv
 
 def get_html(url, useragent=None, proxy=None):
-    timeout = uniform(12, 25)
+    timeout = uniform(15, 30)
     r = requests.get(url, headers=useragent, proxies=proxy, timeout=timeout)
     return r.text
 
@@ -45,6 +45,31 @@ def file_all_sity():
             eng.append(url.split(';')[-1])
             rus.append(url.split(';')[0])
     return eng, rus
+
+def delete_sity(eng, rus):
+    sity = rus + ';' + eng + '\n'
+    all_sity = open('Parsing_avito/all_sity.csv', 'r')
+    lines = all_sity.readlines()
+    all_sity.close()
+
+    all_sity = open('Parsing_avito/all_sity.csv', 'w')
+    for line in lines:
+      if line != sity:
+        all_sity.write(line)
+    all_sity.close()
+
+
+def delete_cat(cat_name, cat_url):
+    cat = cat_name + ';' + cat_url + '\n'
+    all_cat = open('Parsing_avito/cat.csv', 'r')
+    lines = all_cat.readlines()
+    all_cat.close()
+
+    all_cat = open('Parsing_avito/cat.csv', 'w')
+    for line in lines:
+      if line != cat:
+        all_cat.write(line)
+    all_cat.close()
     
 
 def get_phone(url):
